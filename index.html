@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>EFB DEMON TOLIVER44</title>
+  <meta name="theme-color" content="#2a3be0">
+  <link rel="manifest" href="/Toliver/manifest.json">
+  <!-- iPhone support -->
+  <link rel="apple-touch-icon" href="/Toliver/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Don Toliver">
+
+  <style>
+    :root {
+      --bg: #0b0f2a;
+      --card: #141a45;
+      --blue: #2a3be0;
+      --light: #eaf2ff;
+      --muted: #8f9ad6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--light);
+      min-height: 100vh;
+      padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    header { text-align: center; margin-bottom: 24px; }
+    .avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), #7a5cff);
+      display: grid; place-items: center;
+      font-size: 2rem; font-weight: 800;
+      margin: 0 auto 12px;
+      box-shadow: 0 0 24px rgba(42, 59, 224, 0.6);
+    }
+    h1 { font-size: 1.3rem; letter-spacing: 1px; }
+    .tag { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+    .stats strong { display: block; font-size: 1.4rem; }
+    .stats span { font-size: 0.75rem; color: var(--muted); }
+
+    .games { display: flex; flex-wrap: wrap; gap: 8px; }
+    .games span {
+      background: rgba(42, 59, 224, 0.25);
+      border: 1px solid var(--blue);
+      padding: 6px 12px; border-radius: 999px; font-size: 0.85rem;
+    }
+
+    /* Tap challenge */
+    #score { font-size: 3rem; font-weight: 800; text-align: center; }
+    #info { text-align: center; color: var(--muted); margin-bottom: 12px; font-size: 0.9rem; }
+    button {
+      width: 100%; border: none; border-radius: 12px;
+      padding: 16px; font-size: 1rem; font-weight: 700;
+      background: var(--blue); color: white; cursor: pointer;
+    }
+    button:active { transform: scale(0.97); }
+    #installBtn { display: none; background: transparent; border: 1px solid var(--blue); margin-top: 8px; }
+    #offline { text-align: center; color: #ff8a8a; font-size: 0.8rem; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="avatar">EFB</div>
+    <h1>EFB DEMON TOLIVER44</h1>
+    <p class="tag">Gamer</p>
+  </header>
+
+  <div class="card">
+    <h2>Stats</h2>
+    <div class="stats">
+      <div><strong>44</strong><span>Level</span></div>
+      <div><strong id="best">0</strong><span>Best taps</span></div>
+      <div><strong id="plays">0</strong><span>Games played</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Favorite games</h2>
+    <!-- Change these to your friend's real games -->
+    <div class="games">
+      <span>Free Fire</span>
+      <span>eFootball</span>
+      <span>Call of Duty</span>
+      <span>Fortnite</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Tap challenge</h2>
+    <div id="score">0</div>
+    <p id="info">Press start, then tap as fast as you can for 10 seconds.</p>
+    <button id="tapBtn">START</button>
+  </div>
+
+  <button id="installBtn">Install app</button>
+  <p id="offline">You are offline</p>
+
+  <script>
+    // ---------- Tap challenge ----------
+    const scoreEl = document.getElementById('score');
+    const infoEl = document.getElementById('info');
+    const tapBtn = document.getElementById('tapBtn');
+    const bestEl = document.getElementById('best');
+    const playsEl = document.getElementById('plays');
+
+    let score = 0;
+    let playing = false;
+    let best = Number(localStorage.getItem('best')) || 0;
+    let plays = Number(localStorage.getItem('plays')) || 0;
+    bestEl.textContent = best;
+    playsEl.textContent = plays;
+
+    tapBtn.addEventListener('click', () => {
+      if (!playing) {
+        startGame();
+      } else {
+        score++;
+        scoreEl.textContent = score;
+      }
+    });
+
+    function startGame() {
+      playing = true;
+      score = 0;
+      scoreEl.textContent = 0;
+      tapBtn.textContent = 'TAP!';
+      let timeLeft = 10;
+      infoEl.textContent = 'Time left: ' + timeLeft + 's';
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        infoEl.textContent = 'Time left: ' + timeLeft + 's';
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      playing = false;
+      plays++;
+      localStorage.setItem('plays', plays);
+      playsEl.textContent = plays;
+
+      if (score > best) {
+        best = score;
+        localStorage.setItem('best', best);
+        bestEl.textContent = best;
+        infoEl.textContent = 'New best: ' + score + ' taps!';
+      } else {
+        infoEl.textContent = 'You got ' + score + ' taps. Try again!';
+      }
+      tapBtn.textContent = 'PLAY AGAIN';
+    }
+
+    // ---------- Install button ----------
+    let installPrompt = null;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      installPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt = null;
+      installBtn.style.display = 'none';
+    });
+
+    // ---------- Offline notice ----------
+    const offlineEl = document.getElementById('offline');
+    function updateOnline() {
+      offlineEl.style.display = navigator.onLine ? 'none' : 'block';
+    }
+    window.addEventListener('online', updateOnline);
+    window.addEventListener('offline', updateOnline);
+    updateOnline();
+
+    // ---------- Service worker ----------
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Toliver/sw.js', { scope: '/Toliver/' })
+          .then(() => console.log('ServiceWorker registered'))
+          .catch(err => console.log('ServiceWorker failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
